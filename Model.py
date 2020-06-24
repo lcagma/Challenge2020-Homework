@@ -1,10 +1,9 @@
 import random
-
+import time
 import pygame as pg
 
 from EventManager import *
 import Const
-
 
 class StateMachine(object):
     '''
@@ -65,8 +64,9 @@ class GameEngine:
         '''
         self.ev_manager = ev_manager
         ev_manager.register_listener(self)
-
         self.state_machine = StateMachine()
+        self.changetime = Const.CHANGE_TIME
+        self.timeleft = Const.GAME_LENGTH
 
     def initialize(self):
         '''
@@ -137,28 +137,44 @@ class GameEngine:
         '''
         The main loop of the game is in this function.
         This function activates the GameEngine.
-        '''
+        ''' 
         self.running = True
         self.ev_manager.post(EventInitialize())
         self.timer = Const.GAME_LENGTH
         while self.running:
             self.ev_manager.post(EventEveryTick())
             self.clock.tick(Const.FPS)
-
-
+            if (self.state_machine.peek() == Const.STATE_STOP):
+                continue
+            
+            self.changetime -= 1;
+            self.timeleft -= 1;
+            if ((self.players[1].position.x - self.players[0].position.x) ** 2 + (self.players[1].position.y - self.players[0].position.y) ** 2 <= (2 * Const.PLAYER_RADIUS) ** 2):
+                if (self.players[0].player_id == 1):
+                    self.players[0].score += 1;
+                else:
+                    self.players[1].score += 1;
+            if (self.changetime == 0):
+                (self.players[0].speed, self.players[1].speed) = (self.players[1].speed, self.players[0].speed)
+                (self.players[0].player_id, self.players[1].player_id) = (self.players[1].player_id, self.players[0].player_id)
+                self.changetime = Const.CHANGE_TIME
+            if (self.timeleft == 0):
+                self.ev_manager.post(EventTimesUp())
+        
 class Player:
     def __init__(self, player_id):
         self.player_id = player_id
         self.position = Const.PLAYER_INIT_POSITION[player_id] # is a pg.Vector2
         self.speed = Const.SPEED_ATTACK if player_id == 1 else Const.SPEED_DEFENSE
-
+        self.score = 0
     def move_direction(self, direction: str):
         '''
         Move the player along the direction by its speed.
         Will automatically clip the position so no need to worry out-of-bound moving.
         '''
         self.position += self.speed / Const.FPS * Const.DIRECTION_TO_VEC2[direction]
-
+        
         # clipping
         self.position.x = max(0, min(Const.ARENA_SIZE[0], self.position.x))
         self.position.y = max(0, min(Const.ARENA_SIZE[1], self.position.y))
+

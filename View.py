@@ -1,5 +1,5 @@
 import pygame as pg
-
+import time
 from EventManager import *
 from Model import GameEngine
 import Const
@@ -62,26 +62,54 @@ class GraphicalView:
         font = pg.font.Font(None, 36)
         text_surface = font.render("Press [space] to start ...", 1, pg.Color('gray88'))
         text_center = (Const.ARENA_SIZE[0] / 2, Const.ARENA_SIZE[1] / 2)
-        self.screen.blit(text_surface, text_surface.get_rect(center=text_center))
-
+        self.screen.blit(text_surface, text_surface.get_rect(center = text_center))
+        
         pg.display.flip()
 
     def render_play(self):
         # draw background
         self.screen.fill(Const.BACKGROUND_COLOR)
-
+        
         # draw players
         for player in self.model.players:
             center = list(map(int, player.position))
             pg.draw.circle(self.screen, Const.PLAYER_COLOR[player.player_id], center, Const.PLAYER_RADIUS)
 
-        pg.display.flip()
+        #timeleft
+        font = pg.font.Font(None, 36)
+        change_time_surface = font.render(f"change time left: {self.model.changetime / Const.FPS:.2f}", 1, pg.Color('white'))
+        change_time_pos = (Const.ARENA_SIZE[0] / 2, Const.ARENA_SIZE[1] / 20)
+        self.screen.blit(change_time_surface, change_time_surface.get_rect(center = change_time_pos))
 
+        time_left_surface = font.render(f"total time left: {self.model.timeleft / Const.FPS:.2f}", 1, pg.Color('white'))
+        time_left_pos = (Const.ARENA_SIZE[0] / 2, Const.ARENA_SIZE[1] * 2 / 20)
+        self.screen.blit(time_left_surface, time_left_surface.get_rect(center = time_left_pos))
+
+        pause_surface = font.render(f"pause: press p", 1, pg.Color('white'))
+        pause_pos = (Const.ARENA_SIZE[0] * 5 / 6, Const.ARENA_SIZE[1] / 20)
+        self.screen.blit(pause_surface, pause_surface.get_rect(center = pause_pos))
+
+        
+        score_surface = font.render(f"player[0] score: {self.model.players[0].score :d}    player[1] score: {self.model.players[1].score :d}", 1, pg.Color('white'))
+        score_pos = (Const.ARENA_SIZE[0] / 2, Const.ARENA_SIZE[1] * 3 / 20)
+        self.screen.blit(score_surface, score_surface.get_rect(center = score_pos))
+        pg.display.flip()        
     def render_stop(self):
-        pass
-
+        # draw players
+        for player in self.model.players:
+            center = list(map(int, player.position))
+            pg.draw.circle(self.screen, Const.PLAYER_COLOR[player.player_id], center, Const.PLAYER_RADIUS)
+        font = pg.font.Font(None, 36)
+        resume_surface = font.render(f"resume: press o", 1, pg.Color('white'))
+        resume_pos = (Const.ARENA_SIZE[0] / 2, Const.ARENA_SIZE[1] / 2)
+        self.screen.blit(resume_surface, resume_surface.get_rect(center = resume_pos))
+        pg.display.flip()
+        
     def render_endgame(self):
         # draw background
         self.screen.fill(Const.BACKGROUND_COLOR)
-
+        font = pg.font.Font(None, 36)
+        score_surface = font.render(f"player[0] score: {self.model.players[0].score :d}    player[1] score: {self.model.players[1].score :d}", 1, pg.Color('white'))
+        score_pos = (Const.ARENA_SIZE[0] / 2, Const.ARENA_SIZE[1] / 2)
+        self.screen.blit(score_surface, score_surface.get_rect(center = score_pos))
         pg.display.flip()

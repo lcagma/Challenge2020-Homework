@@ -69,8 +69,7 @@ class EventEveryTick(BaseEvent):
 
 class EventTimesUp(BaseEvent):
     name = "Time's Up event"
-
-
+    
 class EventPlayerMove(BaseEvent):
     name = 'PlayerMove event'
 
